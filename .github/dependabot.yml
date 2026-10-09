@@ -4,10 +4,8 @@
 #
 # increase-if-necessary keeps package.json ranges that already allow the new
 # version: the default strategy rewrote the `@strapi/strapi` peer range to the
-# bumped version, which would have excluded older Strapi 5 hosts.
-#
-# The Strapi version under e2e test is pinned on purpose (it mirrors the first
-# consumer) and moves by hand, together in both plugins.
+# bumped version, which would have excluded older Strapi 5 hosts. The e2e app
+# follows the latest Strapi 5 minor so CI runs on what new adopters install.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -34,7 +32,6 @@ updates:
     ignore:
       - dependency-name: '*'
         update-types: ['version-update:semver-major']
-      - dependency-name: '@strapi/*'
   - package-ecosystem: github-actions
     directory: /
     schedule:
