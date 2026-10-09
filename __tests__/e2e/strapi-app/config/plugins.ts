@@ -1,16 +1,20 @@
 import path from 'node:path';
 
+// This plugin is loaded from the repository root (source or compiled config)
 const depth = __dirname.includes(path.join('dist', 'config')) ? 5 : 4;
 const steps = Array.from({ length: depth }, () => '..');
 const pluginRoot = path.resolve(__dirname, ...steps);
-const bffViewsRoot = path.resolve(pluginRoot, '..', 'strapi-plugin-bff-views');
+
+// bff-views comes from npm (a dependency of this app). Set BFF_VIEWS_ROOT to
+// a local checkout to run the e2e suite against unpublished changes.
+const bffViewsRoot = process.env.BFF_VIEWS_ROOT;
 
 export default () => ({
   // Exercises the optional per-view schema generation: when bff-views is
   // enabled in the same app, the generated output additionally contains views/*.
   'bff-views': {
     enabled: true,
-    resolve: bffViewsRoot,
+    ...(bffViewsRoot ? { resolve: bffViewsRoot } : {}),
     config: {
       transformers: {
         'compile-richtext': {
