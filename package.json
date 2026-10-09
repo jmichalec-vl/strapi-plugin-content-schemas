@@ -3,8 +3,16 @@
   "version": "0.2.3",
   "description": "Auto-generate Valibot/Zod validation schemas from Strapi v5 content types. Eliminates hand-written frontend schemas with full attribute coverage, type overrides, and populate generation.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmichalec-vl/strapi-plugin-content-schemas.git"
+  },
+  "homepage": "https://github.com/jmichalec-vl/strapi-plugin-content-schemas#readme",
+  "bugs": {
+    "url": "https://github.com/jmichalec-vl/strapi-plugin-content-schemas/issues"
+  },
   "bin": {
-    "strapi-schemas": "./dist/cli/index.js"
+    "strapi-schemas": "dist/cli/index.js"
   },
   "exports": {
     "./package.json": "./package.json",
