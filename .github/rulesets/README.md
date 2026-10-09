@@ -20,10 +20,12 @@ To update an existing ruleset, find its id with
 ## Bypass actors
 
 - `RepositoryRole 5` (Admin): the maintainer can merge their own pull requests
-  and recover from mistakes.
-- `Integration 15368` (GitHub Actions): the publish workflow pushes the
-  version commit and tag to `main` with the built-in `GITHUB_TOKEN`, so no
-  personal access token is stored as a secret.
+  and recover from mistakes. The publish workflow pushes its version commit
+  and tag to `main` with the maintainer's `GH_PAT` secret for the same
+  reason: on a user-owned repository GitHub does not accept the GitHub
+  Actions app as a bypass actor, so the built-in `GITHUB_TOKEN` cannot push
+  to a protected branch. Use a fine-grained token limited to this repository
+  with `Contents: read and write`, and rotate it on a schedule.
 
 ## Also enable in Settings > Code security
 

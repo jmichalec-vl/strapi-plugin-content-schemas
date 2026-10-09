@@ -22,10 +22,12 @@ jobs:
       # npm provenance attestation
       id-token: write
     steps:
-      # Pushing back to main works through the ruleset's GitHub Actions bypass
+      # A fine-grained PAT (Contents: read/write on this repo): the version
+      # commit and tag go to the protected main through the Admin bypass
       - uses: actions/checkout@v4
         with:
           ref: main
+          token: ${{ secrets.GH_PAT }}
 
       - uses: actions/setup-node@v4
         with:

@@ -9,11 +9,21 @@
     }
   },
   "rules": [
-    { "type": "deletion" },
-    { "type": "non_fast_forward" },
-    { "type": "creation" },
-    { "type": "update" },
-    { "type": "required_linear_history" },
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "creation"
+    },
+    {
+      "type": "update"
+    },
+    {
+      "type": "required_linear_history"
+    },
     {
       "type": "pull_request",
       "parameters": {
@@ -33,16 +43,31 @@
         "strict_required_status_checks_policy": true,
         "do_not_enforce_on_create": false,
         "required_status_checks": [
-          { "context": "Lint & Type Check", "integration_id": 15368 },
-          { "context": "Unit Tests", "integration_id": 15368 },
-          { "context": "Build Plugin", "integration_id": 15368 },
-          { "context": "E2E Tests", "integration_id": 15368 }
+          {
+            "context": "Lint & Type Check",
+            "integration_id": 15368
+          },
+          {
+            "context": "Unit Tests",
+            "integration_id": 15368
+          },
+          {
+            "context": "Build Plugin",
+            "integration_id": 15368
+          },
+          {
+            "context": "E2E Tests",
+            "integration_id": 15368
+          }
         ]
       }
     }
   ],
   "bypass_actors": [
-    { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" },
-    { "actor_id": 15368, "actor_type": "Integration", "bypass_mode": "always" }
+    {
+      "actor_id": 5,
+      "actor_type": "RepositoryRole",
+      "bypass_mode": "always"
+    }
   ]
 }
