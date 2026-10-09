@@ -361,7 +361,7 @@ export interface SharedTag extends Struct.ComponentSchema {
 }
 
 declare module '@strapi/strapi' {
-  export module Public {
+  export namespace Public {
     export interface ComponentSchemas {
       'catalog.associated-variant': CatalogAssociatedVariant;
       'catalog.marketing-metadata': CatalogMarketingMetadata;
