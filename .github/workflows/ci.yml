@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm run format:check
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run test:coverage
+
+  build:
+    name: Build Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm run verify
+      - run: npm run size-check
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Build the plugin (server bundle + CLI - the e2e harness runs the built CLI)
+      - run: npm ci
+      - run: npm run build
+
+      - name: Install E2E app dependencies
+        working-directory: __tests__/e2e/strapi-app
+        run: npm ci
+
+      - name: Create required directories
+        working-directory: __tests__/e2e/strapi-app
+        run: mkdir -p public/uploads .tmp
+
+      # The vitest global setup boots `strapi develop`, waits for health and the
+      # bootstrap-created API token, then pulls both targets through the built
+      # CLI - no manual Strapi lifecycle needed here. All Strapi secrets have
+      # test defaults in the app config.
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          BROWSER: none
+          NODE_OPTIONS: --max-old-space-size=4096

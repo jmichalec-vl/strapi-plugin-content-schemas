@@ -1,0 +1,91 @@
+{
+  "name": "strapi-plugin-content-schemas",
+  "version": "0.2.3",
+  "description": "Auto-generate Valibot/Zod validation schemas from Strapi v5 content types. Eliminates hand-written frontend schemas with full attribute coverage, type overrides, and populate generation.",
+  "license": "MIT",
+  "bin": {
+    "strapi-schemas": "./dist/cli/index.js"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-server": {
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./config": "./config.js"
+  },
+  "scripts": {
+    "build": "strapi-plugin build && npm run build:cli",
+    "build:cli": "tsc -p cli/tsconfig.json",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link",
+    "verify": "strapi-plugin verify",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run --config vitest.config.e2e.ts",
+    "type-check": "tsc --noEmit -p server/tsconfig.json && tsc --noEmit -p cli/tsconfig.json && tsc --noEmit -p __tests__/tsconfig.json",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "size-check": "node scripts/check-package-size.mjs",
+    "prepublishOnly": "npm run size-check"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^5.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@strapi/sdk-plugin": "^6.0.1",
+    "@strapi/strapi": "^5.57.0",
+    "@strapi/types": "^5.57.0",
+    "@typescript-eslint/eslint-plugin": "^8.71.0",
+    "@typescript-eslint/parser": "^8.71.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "eslint": "^9.39.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "content-schemas",
+    "displayName": "Content Schemas",
+    "description": "Auto-generate Valibot/Zod validation schemas from Strapi content types.",
+    "kind": "plugin"
+  },
+  "keywords": [
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5",
+    "content-schemas",
+    "valibot",
+    "zod",
+    "code-generation",
+    "validation",
+    "typescript",
+    "headless-cms"
+  ],
+  "author": "jmichalec-vl",
+  "files": [
+    "dist",
+    "server",
+    "cli",
+    "config.js",
+    "config.d.ts",
+    "package.json",
+    "README.md",
+    "LICENSE.md",
+    "CHANGELOG.md"
+  ],
+  "dependencies": {
+    "jiti": "^2.7.0"
+  }
+}
