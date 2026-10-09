@@ -14,8 +14,9 @@ npm run type-check
 npm run lint && npm run format:check
 ```
 
-Please include tests with behavior changes and run the full suite (including
-e2e) before opening a PR. The e2e fixture app lives in
+A husky `pre-push` hook (installed by `npm install` via the `prepare`
+script) runs type-check, lint, format check and the unit tests before every
+push. Please also run the e2e suite before opening a PR. The e2e fixture app lives in
 `__tests__/e2e/strapi-app/` - extend it when your change needs a content-model
 shape it doesn't cover yet.
 

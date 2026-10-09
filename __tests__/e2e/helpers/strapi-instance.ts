@@ -10,8 +10,20 @@ const GENERATED_ZOD_DIR = path.resolve(STRAPI_APP_DIR, '.tmp', 'generated-zod');
 const SEED_FILE = path.resolve(STRAPI_APP_DIR, '.tmp', 'seed-ids.json');
 const TOKEN_PATH = path.resolve(STRAPI_APP_DIR, '.tmp', 'api-token.txt');
 const CLI_PATH = path.resolve(PLUGIN_ROOT, 'dist', 'cli', 'index.js');
+// Spawned directly (no npx wrapper) so the process we signal is Strapi itself
+const STRAPI_BIN = path.resolve(
+  STRAPI_APP_DIR,
+  'node_modules',
+  '@strapi',
+  'strapi',
+  'bin',
+  'strapi.js',
+);
 const BASE_URL = process.env.STRAPI_URL ?? 'http://127.0.0.1:1337';
 const STARTUP_TIMEOUT_MS = 120_000;
+const SHUTDOWN_GRACE_MS = 5_000;
+// Teardown never waits longer than this, whatever the child does
+const SHUTDOWN_DEADLINE_MS = 15_000;
 
 let strapiProcess: ChildProcess | null = null;
 
@@ -81,11 +93,20 @@ export const setup = async (): Promise<void> => {
 
   console.log('[strapi] Starting Strapi in dev mode...');
 
-  strapiProcess = spawn('npx', ['strapi', 'develop'], {
-    cwd: STRAPI_APP_DIR,
-    env: { ...process.env, NODE_ENV: 'development', BROWSER: 'none' },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  // The tests only use API routes, so the admin UI build is skipped.
+  // `detached` puts Strapi and every process it forks into their own process
+  // group, which teardown kills as a whole: signalling only the direct child
+  // left workers alive on Linux and vitest waiting forever for them.
+  strapiProcess = spawn(
+    process.execPath,
+    [STRAPI_BIN, 'develop', '--no-watch-admin', '--no-build-admin'],
+    {
+      cwd: STRAPI_APP_DIR,
+      env: { ...process.env, NODE_ENV: 'development', BROWSER: 'none' },
+      stdio: ['ignore', 'pipe', 'pipe'],
+      detached: true,
+    },
+  );
 
   strapiProcess.stdout?.on('data', (data: Buffer) => {
     const line = data.toString().trim();
@@ -122,21 +143,32 @@ export const setup = async (): Promise<void> => {
   console.log('[strapi] Schema generation complete (both targets).');
 };
 
+const signalProcessGroup = (child: ChildProcess, signal: NodeJS.Signals): void => {
+  if (!child.pid) return;
+  try {
+    process.kill(-child.pid, signal);
+  } catch {
+    // the group is already gone
+  }
+};
+
 export const teardown = async (): Promise<void> => {
-  if (!strapiProcess) return;
+  const child = strapiProcess;
+  if (!child) return;
+  strapiProcess = null;
 
-  return new Promise((resolve) => {
-    strapiProcess!.on('close', () => {
-      strapiProcess = null;
+  await new Promise<void>((resolve) => {
+    // Hoisted so the timers below can reference it before it runs
+    function finish(): void {
+      clearTimeout(graceTimer);
+      clearTimeout(deadlineTimer);
       resolve();
-    });
-
-    strapiProcess!.kill('SIGTERM');
-
-    setTimeout(() => {
-      if (strapiProcess) {
-        strapiProcess.kill('SIGKILL');
-      }
-    }, 5_000);
+    }
+    // 'exit' fires when the process itself ends; 'close' would also wait for
+    // every descendant holding the stdio pipes
+    child.once('exit', finish);
+    signalProcessGroup(child, 'SIGTERM');
+    const graceTimer = setTimeout(() => signalProcessGroup(child, 'SIGKILL'), SHUTDOWN_GRACE_MS);
+    const deadlineTimer = setTimeout(finish, SHUTDOWN_DEADLINE_MS);
   });
 };
